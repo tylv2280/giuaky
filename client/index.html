@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rock Paper Scissors</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 20px; }
+    button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+    #log { margin-top: 20px; border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <h1>Rock Paper Scissors ✊✋✌️</h1>
+  <div>
+    <input id="name" placeholder="Nhập tên của bạn">
+    <button onclick="setName()">Đặt tên</button>
+  </div>
+  <div>
+    <button onclick="sendChoice('rock')">Rock ✊</button>
+    <button onclick="sendChoice('paper')">Paper ✋</button>
+    <button onclick="sendChoice('scissors')">Scissors ✌️</button>
+  </div>
+  <div id="log"></div>
+
+  <script>
+    const ws = new WebSocket("ws://localhost:3000");
+    const log = document.getElementById("log");
+
+    function addLog(msg) {
+      log.innerHTML += msg + "<br>";
+      log.scrollTop = log.scrollHeight;
+    }
+
+    ws.onopen = () => addLog("✅ Connected to server");
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "welcome") addLog("Server: " + data.message);
+      if (data.type === "name_set") addLog("Tên của bạn: " + data.name);
+      if (data.type === "choice_received") addLog("Bạn đã chọn: " + data.choice);
+      if (data.type === "result") {
+        addLog(`<b>${data.p1.name} chọn ${data.p1.choice}, ${data.p2.name} chọn ${data.p2.choice}</b>`);
+        addLog(`<b>Kết quả: ${data.result}</b>`);
+        addLog("------");
+      }
+    };
+
+    function setName() {
+      const name = document.getElementById("name").value;
+      ws.send(JSON.stringify({ type: "set_name", name }));
+    }
+
+    function sendChoice(choice) {
+      ws.send(JSON.stringify({ type: "choice", choice }));
+    }
+  </script>
+</body>
+</html>
