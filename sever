@@ -58,7 +58,7 @@ wss.on("connection", (ws) => {
           player.send(JSON.stringify({ type: "result", p1, p2, result }))
         );
 
-        // Reset lượt
+        // Reset lượt.
         players.forEach(p => p.choice = null);
       }
     }
